@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLgsTable extends Migration
+class CreateApiAuthTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateLgsTable extends Migration
      */
     public function up()
     {
-        Schema::create('lgs', function (Blueprint $table) {
-            $table->increments('idlgs');
-            $table->integer('state_id');
-            $table->foreign('state_id')->references('idstates')->on('states');
-            $table->string('lgs');
+        Schema::create('api_auth', function (Blueprint $table) {
+            $table->increments('idapiauth');
+            $table->string('token');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ class CreateLgsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('lgs');
+        Schema::dropIfExists('api_auth');
     }
 }
