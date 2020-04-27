@@ -21,13 +21,15 @@ class User extends Authenticatable
         'sex','marital_status','dob','lg_id','status','state_id'
     ];
 
+    protected  $primaryKey = 'idusers';
+
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
     ];
 
     /**

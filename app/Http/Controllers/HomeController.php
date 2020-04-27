@@ -6,6 +6,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Illuminate\Support\Facades\DB;
 
+
 class HomeController extends Controller
 {
     public function index()

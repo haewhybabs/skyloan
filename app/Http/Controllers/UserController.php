@@ -31,11 +31,6 @@ class UserController extends Controller
             'fullname'=>'required',
             'address'=>'required',
             'phone_number'=>'required',
-            'sex'=>'required',
-            'marital_status'=>'required',
-            'dob'=>'required',
-            'lg_id'=>'required',
-            'state_id'=>'required'
         ]);
 
         $validatedData['password']=bcrypt($request->password);
@@ -55,7 +50,7 @@ class UserController extends Controller
         $accessToken = auth()->user()->createToken('authToken')->accessToken;
         $userData = array(
             'fullname'=>$user->fullname,
-            'idusers'=>$user->id,
+            'idusers'=>$user->idusers,
             'email'=>$user->email,
             'role_id'=>$user->role_id,
             'token'=>$accessToken,
@@ -63,7 +58,7 @@ class UserController extends Controller
         );
 
         $task=$userData['fullname'].' just created account with Skyloan';
-        $this->audit($task,$user->id);
+        $this->audit($task,$user->idusers);
         return response()->json($userData,200)->header('content-Type','application/json');
 
        
@@ -92,7 +87,7 @@ class UserController extends Controller
         );
 
         $task=$userData['fullname'].' just logged in with user account on Skyloan';
-        $this->audit($task,$userData->idusers);
+        $this->audit($task,$userData['idusers']);
 
         return response()->json($userData,200)->header('content-Type','application/json');
         $current_date = date('Y-m-d H:i:s');

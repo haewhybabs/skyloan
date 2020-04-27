@@ -27,6 +27,40 @@ trait BaseController
         DB::table('audit_trail')->insert($data_audit);
     }
 
+
+    public function profileCompletePercentage()
+    {
+        $userId = auth()->user()->idusers;
+
+        $previousPercentage = 40;
+        $count=0;
+
+        $bankInfo=DB::table('bank_information')->where('user_id',$userId)->first();
+
+        $nextOfKinInfo = DB::table('next_of_kin')->where('user_id',$userId)->first();
+
+        $employmentInfo = DB::table('users_employment_info')->where('user_id',$userId)->first();
+
+        if($bankInfo){
+            $count=$count+1;
+        }
+
+        if($nextOfKinInfo){
+            $count=$count+1;
+        }
+
+        if($employmentInfo){
+
+            $count=$count+1;
+        }
+
+        $percentage = 20 * $count;
+
+        $totalPercentage = $previousPercentage + $percentage;
+
+        return $totalPercentage;
+    }
+
 }
 
 ?>
