@@ -16,12 +16,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register','UserController@register');
 Route::post('/login','UserController@login');
+Route::get('/test','UserController@test');
+
 
 Route::middleware('auth:api')->group(function () {
 
-    Route::get('/profile','UserProfile@index');
+    Route::post('/profile','UserProfile@index');
+    Route::post('/user-profile','UserProfile@updateUserProfile');
     Route::post('/bank-info','UserProfile@bankInfo');
     Route::post('/employment-info','UserProfile@employmentInfo');
-    Route::post('/next-of-kin-info','UserProfile@nextOfKin');
+    Route::post('/next-of-kin-info','UserProfile@nextOfKinInfo');
+    Route::post('/loan-request','Loans@loanRequest');
+    Route::post('/dashboard','Dashboard@index');
 
 });

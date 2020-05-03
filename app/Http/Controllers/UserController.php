@@ -34,7 +34,7 @@ class UserController extends Controller
         ]);
 
         $validatedData['password']=bcrypt($request->password);
-        $validatedData['role_id']=2;
+        $validatedData['role_id']=1;
         $validatedData['status']=1;
         
         $user=User::create($validatedData);
@@ -93,5 +93,19 @@ class UserController extends Controller
         $current_date = date('Y-m-d H:i:s');
 
 
+    }
+
+    public function test(){
+        $startdate=strtotime("2020-05-03");
+        $enddate = strtotime("+30 days",$startdate);
+        $date = date("Y-m-d h:i:sa", $enddate);
+
+        $data = array(
+            'end'=>$enddate,
+            'start'=>$startdate,
+            'date'=>$date,
+            
+        );
+        return response()->json($data,200)->header('content-Type','application/json');
     }
 }

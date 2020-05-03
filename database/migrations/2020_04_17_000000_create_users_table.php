@@ -23,11 +23,14 @@ class CreateUsersTable extends Migration
             $table->integer('phone_number');
             $table->integer('role_id')->unsigned();
             $table->foreign('role_id')->references('idroles')->on('roles');
-            $table->string('sex');
-            $table->integer('lg_id')->unsigned();
+            $table->string('sex')->nullable();
+            $table->integer('lg_id')->unsigned()->nullable();
             $table->foreign('lg_id')->references('idlgs')->on('lgs');
-            $table->string('address');
-            $table->string('marital_status');
+            $table->integer('state_id')->unsigned()->nullable();
+            $table->foreign('state_id')->references('idstates')->on('states');
+            $table->string('address')->nullable();
+            $table->integer('marital_status')->nullable();
+            $table->foreign('marital_status')->references('idmaritalstatus')->on('marital_status');
             $table->date('dob');
             $table->rememberToken();
             $table->timestamps();

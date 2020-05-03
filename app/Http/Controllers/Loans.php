@@ -42,7 +42,7 @@ class Loans extends Controller
         ]);
         
 
-        $loanCheck=DB::table('loans')->where('user_id',$userId)->where('laon_status',2)->first();
+        $loanCheck=DB::table('loans')->where('user_id',$userId)->where('loan_status',2)->first();
 
         if($loanCheck){
 

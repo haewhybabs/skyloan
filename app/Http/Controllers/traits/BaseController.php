@@ -32,14 +32,20 @@ trait BaseController
     {
         $userId = auth()->user()->idusers;
 
-        $previousPercentage = 40;
+        $previousPercentage = 20;
         $count=0;
+
+        $userInfo = DB::table('users')->where('idusers',$userId)->first();
 
         $bankInfo=DB::table('bank_information')->where('user_id',$userId)->first();
 
         $nextOfKinInfo = DB::table('next_of_kin')->where('user_id',$userId)->first();
 
         $employmentInfo = DB::table('users_employment_info')->where('user_id',$userId)->first();
+
+        if($userInfo->sex !=null){
+            $count =$count +1;
+        }
 
         if($bankInfo){
             $count=$count+1;
@@ -59,6 +65,60 @@ trait BaseController
         $totalPercentage = $previousPercentage + $percentage;
 
         return $totalPercentage;
+    }
+
+    public function loanPaymentAmount()
+    {
+
+        $userId = auth()->user()->idusers;
+        $loanCheck = DB::table('loans')->where('user_id',$userId)->where('loan_status',2)->first();
+        $loanPayment = 0;
+
+        if($loanCheck){
+            $loanDuration = DB::table('loan_duration')->first();
+            $loanMonthlyPercentage = DB::table('loan_rate')->where('idloanrate',1)->first();
+            $loanOverduePercentage = DB::table('loan_rate')->where('idloanrate',2)->first();
+
+            
+            $loanObtain = $loanCheck->amount;
+            $duration = $loanDuration->duration;
+
+
+            $loanStartDate = strtotime($loanCheck->loan_start_date);
+            $end = strtotime("+".$duration." days",$loanStartDate);
+            $today = strtotime("now");
+            if($today>$end){
+
+                $percentage = $loanOverduePercentage->rate;
+                
+                
+                $timeDifference = $today-$loanStartDate;
+
+                $dayDifference = round($timeDifference/(60 *60 *24));
+
+                $noOfMonth = floor($dayDifference/$duration);
+
+                $percentageAmount =  ($percentage/100 * $loanObtain) * $noOfMonth;
+
+                $loanPayment = $percentageAmount + $loanObtain;
+
+
+            }
+
+            else{
+                
+                $percentage =$loanMonthlyPercentage->rate;
+                $percentageAmount = $percentage/100 * $loanObtain;
+
+                $loanPayment = $percentageAmount + $loanObtain;
+
+            }
+
+            
+        }
+
+        return $loanPayment;
+        
     }
 
 }

@@ -22,9 +22,7 @@ class UserProfile extends Controller
         $lgs =DB::table('lgs')->get();
         $relationship =DB::table('relationship')->get();
 
-        $userInfo = DB::table('users')->join('users_employment_info','users_employment_info.user_id','=','users.idusers')
-        ->where('users.idusers',$userId)
-        ->first();
+        $userInfo = DB::table('users')->where('users.idusers',$userId)->first();
 
         $nextOfKinInfo = DB::table('next_of_kin')->join('users','next_of_kin.user_id','=','users.idusers')->where('next_of_kin.user_id',$userId)->first();
 
@@ -39,6 +37,9 @@ class UserProfile extends Controller
         ->join('banks','banks.idbanks','=','bank_information.bank_id')
         ->where('bank_information.user_id',$userId)
         ->first();
+
+        $sex = DB::table('sex')->get();
+        $marital_status = DB::table('marital_status')->get();
 
         $percentage = $this->profileCompletePercentage();
 
@@ -56,12 +57,39 @@ class UserProfile extends Controller
             'relationship'=>$relationship,
             'status'=>true,
             'percentage'=>$percentage,
+            'sex'=>$sex,
+            'marital_status'=>$marital_status
 
         );
 
         return response()->json($data,200)->header('content-Type','application/json');
 
 
+    }
+
+    public function updateUserProfile(Request $request)
+    {
+        $validatedData= $request->validate([
+            'fullname'=>'required',
+            'address'=>'required',
+            'phone_number'=>'required',
+            'sex'=>'required',
+            'marital_status'=>'required',
+            'lg_id'=>'required',
+            'state_id'=>'required',
+            'dob'=>'required',
+
+        ]);
+
+        $validatedData['updated_at']=date('Y-m-d H:i:s');
+
+        DB::table('users')->where('idusers',auth()->user()->idusers)->update($validatedData);
+
+        $data=array(
+            'status'=>true,
+        );
+
+        return response()->json($data,200)->header('content-Type','application/json');
     }
 
     public function employmentInfo(Request $request)
@@ -71,15 +99,31 @@ class UserProfile extends Controller
             'employment_type_id'=>'required',
             'employer_name'=>'required',
             'employer_lg_id'=>'required',
+            'employer_state_id'=>'required',
             'employer_address'=>'required',
             'salary_range_id'=>'required',
             'nature_of_job'=>'required',
         ]);
 
-        $validatedData['created_at']=date('Y-m-d H:i:s');
+        
         $validatedData['user_id']=auth()->user()->idusers;
 
-        DB::table('users_employment_info')->insert($validatedData);
+
+        $tryGetUser = DB::table('users_employment_info')->where('user_id',auth()->user()->idusers)->first();
+
+        if($tryGetUser){
+            $validatedData['updated_at']=date('Y-m-d H:i:s');
+            DB::table('users_employment_info')->update($validatedData);
+
+        }
+        else{
+            $validatedData['created_at']=date('Y-m-d H:i:s');
+
+            DB::table('users_employment_info')->insert($validatedData);
+
+        }
+
+        
 
         $data=array(
             'status'=>true,
@@ -95,14 +139,27 @@ class UserProfile extends Controller
             'email'=>'required',
             'state_id'=>'required',
             'lg_id'=>'required',
-            'relationship_id'=>'required',
+            'relationship'=>'required',
             'address'=>'required',
+            'fullname'=>'required'
         ]);
 
-        $validatedData['created_at']=date('Y-m-d H:i:s');
+       
         $validatedData['user_id']=auth()->user()->idusers;
 
-        DB::table('next_of_kin')->insert($validatedData);
+        $tryGetUser = DB::table('next_of_kin')->where('user_id',auth()->user()->idusers)->first();
+
+        if($tryGetUser){
+            $validatedData['updated_at']=date('Y-m-d H:i:s');
+            DB::table('next_of_kin')->update($validatedData);
+
+        }
+        else{
+            $validatedData['created_at']=date('Y-m-d H:i:s');
+
+            DB::table('next_of_kin')->insert($validatedData);
+
+        }
 
         $data=array(
             'status'=>true,
@@ -119,11 +176,22 @@ class UserProfile extends Controller
             'bvn'=>'required',
         ]);
 
-        $validatedData['created_at']=date('Y-m-d H:i:s');
-
+        
         $validatedData['user_id']=auth()->user()->idusers;
 
-        DB::table('bank_information')->insert($validatedData);
+        $tryGetUser = DB::table('bank_information')->where('user_id',auth()->user()->idusers)->first();
+
+        if($tryGetUser){
+            $validatedData['updated_at']=date('Y-m-d H:i:s');
+            DB::table('bank_information')->update($validatedData);
+
+        }
+        else{
+            $validatedData['created_at']=date('Y-m-d H:i:s');
+
+            DB::table('bank_information')->insert($validatedData);
+
+        }
 
         $data=array(
             'status'=>true,
