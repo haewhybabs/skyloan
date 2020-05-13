@@ -89,6 +89,9 @@ class UserProfile extends Controller
             'status'=>true,
         );
 
+        $task=auth()->user()->fullname.' updated profile details';
+        $this->audit($task,auth()->user()->idusers);
+
         return response()->json($data,200)->header('content-Type','application/json');
     }
 
@@ -128,6 +131,8 @@ class UserProfile extends Controller
         $data=array(
             'status'=>true,
         );
+        $task=auth()->user()->fullname.' updated employment information';
+        $this->audit($task,auth()->user()->idusers);
 
         return response()->json($data,200)->header('content-Type','application/json');
     }
@@ -164,6 +169,8 @@ class UserProfile extends Controller
         $data=array(
             'status'=>true,
         );
+        $task=auth()->user()->fullname.' updated next of kin information';
+        $this->audit($task,auth()->user()->idusers);
 
         return response()->json($data,200)->header('content-Type','application/json');
     }
@@ -197,7 +204,50 @@ class UserProfile extends Controller
             'status'=>true,
         );
 
+        $task=auth()->user()->fullname.' updated bank information';
+        $this->audit($task,auth()->user()->idusers);
+
         return response()->json($data,200)->header('content-Type','application/json');
+    }
+
+
+    public function uploadProfilePicture(Request $request)
+    {
+        $userId = auth()->user()->idusers;
+
+        $data['status'] = false;
+
+        if($request->has('image')){
+            $fileName=substr(sha1(rand()), 0, 10).$userId.'.'.$request->file('image')->extension();
+            $path=$request->file('image')->move(public_path('/profileimages'),$fileName);
+            $photoURL=url('/profileimages/'.$fileName);
+
+            DB::table('users')->where('idusers',$userId)->update(['image'=>$photoURL]);
+            $data['status'] =true;
+            $data['url']=$photoURL;
+
+            $task=auth()->user()->fullname.' changed profile picture';
+            $this->audit($task,auth()->user()->idusers);
+
+        }
+
+        return response()->json($data,200)->header('content-Type','application/json');
+
+    }
+
+    public function contactUs(Request $request)
+    {
+        $validatedData = $request->validate([
+            'message'=>'required'
+        ]);
+        $userId = auth()->user()->idusers;
+        $validatedData['created_at']=date('Y-m-d H:i:s');
+
+        DB::table('contact_us')->insert($validatedData);
+
+        $task=auth()->user()->fullname.' just sent a message. Kindly attend to it';
+        $this->audit($task,auth()->user()->idusers);
+
     }
 
     

@@ -27,6 +27,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/employment-info','UserProfile@employmentInfo');
     Route::post('/next-of-kin-info','UserProfile@nextOfKinInfo');
     Route::post('/loan-request','Loans@loanRequest');
+    Route::post('/loans','Loans@index');
     Route::post('/dashboard','Dashboard@index');
+    Route::post('/image-upload','UserProfile@uploadProfilePicture');
+    Route::post('/loan-history','Loans@loanHistory');
+    Route::post('/contact-us','UserProfile@contactUs');
 
 });

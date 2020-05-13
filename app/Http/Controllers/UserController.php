@@ -29,12 +29,11 @@ class UserController extends Controller
             'email'=>'email|required|unique:users',
             'password'=>'required|confirmed',
             'fullname'=>'required',
-            'address'=>'required',
             'phone_number'=>'required',
         ]);
 
         $validatedData['password']=bcrypt($request->password);
-        $validatedData['role_id']=1;
+        $validatedData['role_id']=2;
         $validatedData['status']=1;
         
         $user=User::create($validatedData);
@@ -73,7 +72,7 @@ class UserController extends Controller
         ]);
 
         if(!auth()->attempt($loginData)){
-            return response(['message'=>'Invalid Credentials']);
+            return response(['message'=>'Invalid Credentials','status'=>false]);
         }
 
         $accessToken = auth()->user()->createToken('authToken')->accessToken;
@@ -83,7 +82,8 @@ class UserController extends Controller
             'idusers'=>auth()->user()->idusers,
             'email'=>auth()->user()->email,
             'role_id'=>auth()->user()->role_id,
-            'token'=>$accessToken
+            'token'=>$accessToken,
+            'status'=>true
         );
 
         $task=$userData['fullname'].' just logged in with user account on Skyloan';

@@ -71,35 +71,40 @@ trait BaseController
     {
 
         $userId = auth()->user()->idusers;
-        $loanCheck = DB::table('loans')->where('user_id',$userId)->where('loan_status',2)->first();
+
+        $loanCheck = DB::table('loans')->join('loan_range','loan_range.idloanrange','=','loans.loan_range_id')
+        ->where('loans.user_id',$userId)->where('loans.loan_status',2)->orwhere('loans.loan_status',3)->first();
         $loanPayment = 0;
+        $data['status']=false;
 
         if($loanCheck){
             $loanDuration = DB::table('loan_duration')->first();
             $loanMonthlyPercentage = DB::table('loan_rate')->where('idloanrate',1)->first();
             $loanOverduePercentage = DB::table('loan_rate')->where('idloanrate',2)->first();
 
-            
+
             $loanObtain = $loanCheck->amount;
             $duration = $loanDuration->duration;
-
 
             $loanStartDate = strtotime($loanCheck->loan_start_date);
             $end = strtotime("+".$duration." days",$loanStartDate);
             $today = strtotime("now");
+            $timeDifference = $today-$loanStartDate;
+            $dayDifference = round($timeDifference/(60 *60 *24));
+            $noOfMonth = floor($dayDifference/$duration);
+            $data['noOfMonth']=$noOfMonth;
+            $data['noOfDays']=$dayDifference;
+            $data['status']=true;
+            $data['loanDetails']=$loanCheck;
+            
             if($today>$end){
 
+                if($loanCheck->loan_status==2){
+                    DB::table('loans')->where('user_id',$userId)->where('loan_status',2)->update(['loan_status'=>3]);
+                }
+
                 $percentage = $loanOverduePercentage->rate;
-                
-                
-                $timeDifference = $today-$loanStartDate;
-
-                $dayDifference = round($timeDifference/(60 *60 *24));
-
-                $noOfMonth = floor($dayDifference/$duration);
-
                 $percentageAmount =  ($percentage/100 * $loanObtain) * $noOfMonth;
-
                 $loanPayment = $percentageAmount + $loanObtain;
 
 
@@ -113,11 +118,12 @@ trait BaseController
                 $loanPayment = $percentageAmount + $loanObtain;
 
             }
+            $data['loanToPay']=$loanPayment;
 
             
         }
 
-        return $loanPayment;
+        return $data;
         
     }
 
