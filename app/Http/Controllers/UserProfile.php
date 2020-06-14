@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\traits\BaseController;
-
+use App\Mail\ContactUsNotification;
+use Illuminate\Support\Facades\Mail;
 class UserProfile extends Controller
 {
     use BaseController;
@@ -101,8 +102,6 @@ class UserProfile extends Controller
 
             'employment_type_id'=>'required',
             'employer_name'=>'required',
-            'employer_lg_id'=>'required',
-            'employer_state_id'=>'required',
             'employer_address'=>'required',
             'salary_range_id'=>'required',
             'nature_of_job'=>'required',
@@ -142,8 +141,6 @@ class UserProfile extends Controller
         $validatedData = $request->validate([
             'phone_number'=>'required',
             'email'=>'required',
-            'state_id'=>'required',
-            'lg_id'=>'required',
             'relationship'=>'required',
             'address'=>'required',
             'fullname'=>'required'
@@ -237,16 +234,29 @@ class UserProfile extends Controller
 
     public function contactUs(Request $request)
     {
+        $user = auth()->user();
         $validatedData = $request->validate([
             'message'=>'required'
         ]);
-        $userId = auth()->user()->idusers;
+        $userId = $user->idusers;
         $validatedData['created_at']=date('Y-m-d H:i:s');
+        $validatedData['user_id']=$userId;
 
         DB::table('contact_us')->insert($validatedData);
+        
 
-        $task=auth()->user()->fullname.' just sent a message. Kindly attend to it';
-        $this->audit($task,auth()->user()->idusers);
+        Mail::to($user->email)->send(new ContactUsNotification($user));
+
+        $task=$user->fullname.' just sent a message. Kindly attend to it';
+        $this->audit($task,$user->idusers);
+
+        $data=array(
+            'status'=>true
+        );
+        
+        return response()->json($data,200)->header('content-Type','application/json');
+
+
 
     }
 

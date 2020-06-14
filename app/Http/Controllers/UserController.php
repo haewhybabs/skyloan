@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\traits\BaseController;
 use App\User;
 use Illuminate\Support\Facades\DB;
+use App\Mail\EmailVerification;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -35,6 +37,7 @@ class UserController extends Controller
         $validatedData['password']=bcrypt($request->password);
         $validatedData['role_id']=2;
         $validatedData['status']=1;
+        $validatedData['remember_token']=substr(sha1(rand()), 0, 10);
         
         $user=User::create($validatedData);
         $loginData = array(
@@ -45,6 +48,8 @@ class UserController extends Controller
         if(!auth()->attempt($loginData)){
             return response(['message'=>'Invalid Credentials']);
         }
+
+        Mail::to($user->email)->send(new EmailVerification($user));
 
         $accessToken = auth()->user()->createToken('authToken')->accessToken;
         $userData = array(
@@ -96,16 +101,9 @@ class UserController extends Controller
     }
 
     public function test(){
-        $startdate=strtotime("2020-05-03");
-        $enddate = strtotime("+30 days",$startdate);
-        $date = date("Y-m-d h:i:sa", $enddate);
-
-        $data = array(
-            'end'=>$enddate,
-            'start'=>$startdate,
-            'date'=>$date,
-            
-        );
+        $startdate=substr(sha1(rand()), 0, 10);
+        Mail::to($user->email)->send(new HappyEaster($user));
+        
         return response()->json($data,200)->header('content-Type','application/json');
     }
 }

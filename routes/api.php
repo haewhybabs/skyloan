@@ -32,5 +32,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/image-upload','UserProfile@uploadProfilePicture');
     Route::post('/loan-history','Loans@loanHistory');
     Route::post('/contact-us','UserProfile@contactUs');
-
+    Route::post('/user-confirm-amount','Loans@userConfirmAmount');
+    Route::post('/get-loan-amount','Loans@getLoanAmount');
 });

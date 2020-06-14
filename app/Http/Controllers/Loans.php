@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\traits\BaseController;
 use App\User;
 use Illuminate\Support\Facades\DB;
+use App\Mail\LoanNotification;
+use Illuminate\Support\Facades\Mail;
 
 class Loans extends Controller
 {
@@ -73,7 +75,10 @@ class Loans extends Controller
 
         DB::table('loans')->insert($validatedData);
 
+        Mail::to($userCheck->email)->send(new loanNotification($userCheck));
+
         $task=auth()->user()->fullname.' request for a loan. Kindly check it up';
+
         $this->audit($task,auth()->user()->idusers);
 
         return response()->json(
@@ -106,24 +111,48 @@ class Loans extends Controller
         }
 
         $pendingLoan = DB::table('loans')->join('loan_range','loan_range.idloanrange','=','loans.loan_range_id')
-        ->where('loans.user_id',$userId)->where('loans.loan_status',1)->first();
+        ->where('loans.user_id',$userId)->where('loans.loan_status',1)->get();
 
         $maturedLoan = DB::table('loans')->join('loan_range','loan_range.idloanrange','=','loans.loan_range_id')
-        ->where('loans.user_id',$userId)->where('loans.loan_status',4)->first();
+        ->where('loans.user_id',$userId)->where('loans.loan_status',4)->get();
         $rejectedLoan = DB::table('loans')->join('loan_range','loan_range.idloanrange','=','loans.loan_range_id')
-        ->where('loans.user_id',$userId)->where('loans.loan_status',5)->first();
+        ->where('loans.user_id',$userId)->where('loans.loan_status',5)->get();
 
 
         $data = array(
+
             'activeLoan'=>$activeLoan,
             'endDate'=>$endDate,
             'activePaymentDetails'=>$activePaymentDetails,
             'pendingLoans'=>$pendingLoan,
-            'maturedLoan'=>$maturedLoan,
-            'rejectedLoan'=>$rejectedLoan,
+            'maturedLoans'=>$maturedLoan,
+            'rejectedLoans'=>$rejectedLoan,
             'overdueLoan'=>$overdueLoan
         );
 
+        return response()->json($data,200)->header('content-Type','application/json');
+
+    }
+
+
+    public function userConfirmAmount(Request $request)
+    {
+        $data = array(
+            'is_approved'=>$request->type,
+            'updated_at'=>date('Y-m-d H:i:s'),
+        );
+        DB::table('loans')->where('idloans',$request->loanId)->update($data);
+        return response()->json(['status'=>true],200)->header('content-Type','application/json');
+    }
+
+    public function getLoanAmount(Request $request){
+        $userId = auth()->user()->idusers;
+        $data = array(
+            'loanData'=>DB::table('loans')->where('user_id',$userId)->where('loan_status',1)
+            ->where('is_approved',0)->orWhere('is_approved',1)->orWhere('is_approved',4)->orderBy('idloans','DESC')
+            ->first(),
+            'status'=>true
+        );
         return response()->json($data,200)->header('content-Type','application/json');
 
     }
