@@ -177,15 +177,14 @@
 								<td width="400" align="center">
 									<div class="contentEditableContainer contentTextEditable">
 					                	<div class="contentEditable" align='left' >
-					                  		<p> <strong>Hello {{$user->fullname}},</strong> 
+					                  		<p> <strong>Dear {{$user->fullname}},</strong> 
 					                  			<br/>
                                                   <br/>
-												We are always happy to support in anyway we could. Your request will be attended to,
+												We acknowledge the receipt of your mail to us and the reference number: <strong>{{$ref}}</strong> has been created for 
+												easy tracking of your correspondence.
 												<br/>
-												kindly exercise patience. <br>							
-                                                <br/>
-                                                We will get back to you shortly.
-                                                <br/>
+												kindly expect an update within the next 24 hours. <br>							
+        
                                                 <br/>
                                                 Cheers!!!
 

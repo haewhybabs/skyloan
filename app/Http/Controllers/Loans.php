@@ -17,11 +17,13 @@ class Loans extends Controller
     {
         $loanPlans = DB::table('loan_range')->get();
         $loanDuration = DB::table('loan_duration')->first();
+        $loanReasons = DB::table('loan_reasons')->get();
         
         $data = array(
             'status'=>true,
             'loanPlans'=>$loanPlans,
-            'loanDuration'=>$loanDuration
+            'loanDuration'=>$loanDuration,
+            'loanReasons'=>$loanReasons
         );
 
         return response()->json($data,200)->header('content-Type','application/json');
@@ -49,7 +51,7 @@ class Loans extends Controller
 
             'amount'=>'required',
             'loan_range_id'=>'required',
-            'loan_info'=>'required',
+            'loan_reason'=>'required',
         ]);
         
 
@@ -146,6 +148,7 @@ class Loans extends Controller
     }
 
     public function getLoanAmount(Request $request){
+        
         $userId = auth()->user()->idusers;
         $data = array(
             'loanData'=>DB::table('loans')->where('user_id',$userId)->where('loan_status',1)
@@ -155,6 +158,32 @@ class Loans extends Controller
         );
         return response()->json($data,200)->header('content-Type','application/json');
 
+    }
+
+    public function successTransaction(Request $request)
+    {
+        $data['status']=false;
+        $validatedData = $request->validate([
+            'amount'=>'required',
+            'reference'=>'required',
+        ]);
+        $validatedData['user_id']=auth()->user()->idusers;
+        $validatedData['created_at']=date('Y-m-d H:i:s');
+        DB::table('transactions')->insert($validatedData);
+
+        $loanId = $request->loanId;
+        $update=DB::table('loans')->where('idloans',$loanId)->update(['loan_status'=>4,'updated_at'=>date('Y-m-d H:i:s')]);
+
+        if($update)
+        {
+
+            $data =array(
+                'status'=>true,
+                'message'=>'success!!!'
+            );
+        }
+
+        return response()->json($data,200)->header('content-Type','application/json');
     }
     
 }

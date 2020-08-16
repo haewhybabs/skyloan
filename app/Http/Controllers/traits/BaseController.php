@@ -83,7 +83,7 @@ trait BaseController
             $loanOverduePercentage = DB::table('loan_rate')->where('idloanrate',2)->first();
 
 
-            $loanObtain = $loanCheck->amount;
+            $loanObtain = $loanCheck->approvedAmount;
             $duration = $loanDuration->duration;
 
             $loanStartDate = strtotime($loanCheck->loan_start_date);

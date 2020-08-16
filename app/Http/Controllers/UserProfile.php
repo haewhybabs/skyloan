@@ -217,7 +217,7 @@ class UserProfile extends Controller
         if($request->has('image')){
             $fileName=substr(sha1(rand()), 0, 10).$userId.'.'.$request->file('image')->extension();
             $path=$request->file('image')->move(public_path('/profileimages'),$fileName);
-            $photoURL=url('/profileimages/'.$fileName);
+            $photoURL=url('/skyloan/public/profileimages/'.$fileName);
 
             DB::table('users')->where('idusers',$userId)->update(['image'=>$photoURL]);
             $data['status'] =true;
@@ -241,11 +241,12 @@ class UserProfile extends Controller
         $userId = $user->idusers;
         $validatedData['created_at']=date('Y-m-d H:i:s');
         $validatedData['user_id']=$userId;
+        $validatedData['reference']=$this->generateRandomString();
 
         DB::table('contact_us')->insert($validatedData);
         
 
-        Mail::to($user->email)->send(new ContactUsNotification($user));
+        Mail::to($user->email)->send(new ContactUsNotification($user,$validatedData['reference']));
 
         $task=$user->fullname.' just sent a message. Kindly attend to it';
         $this->audit($task,$user->idusers);
@@ -258,6 +259,16 @@ class UserProfile extends Controller
 
 
 
+    }
+
+    public function generateRandomString($length = 10) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
     }
 
     

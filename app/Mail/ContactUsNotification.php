@@ -17,9 +17,11 @@ class ContactUsNotification extends Mailable
      * @return void
      */
     public $user;
-    public function __construct($user)
+    public $ref;
+    public function __construct($user,$ref)
     {
         $this->user = $user;
+        $this->ref = $ref;
     }
 
     /**
